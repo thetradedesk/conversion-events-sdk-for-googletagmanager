@@ -13,12 +13,13 @@ ___INFO___
   "id": "cvt_temp_public_id",
   "version": 1,
   "securityGroups": [],
-  "displayName": "TTD Conversion Events JS SDK (example)",
+  "displayName": "The Trade Desk Conversion Events JS SDK",
   "brand": {
     "id": "brand_dummy",
-    "displayName": ""
+    "displayName": "",
+    "thumbnail": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABwAAAAcCAMAAABF0y+mAAAAZlBMVEX///+o0v2Sx/yu1v1NrfsAlPoAlfpWsPv3/P8Al/oAmfpcsvuTyvwjofrX6/6Ew/w7pvuezvwAkPq02f0AkfoAi/m53P3a7f4Am/rG4/0loPp0vPzr9v/j8v57vvzQ6P5CqfvB4P3CUxjqAAAA3UlEQVR4AbXQRQLDMAxE0SnIsSbsqsz3P2QpDNv+7TMK/26x/Laax7U45ySCn0WnpMZI0myKeRQXXywlJEPxn4CN/JCW9y0Ott0Bqy/uD8qw6ywLtCNqhD8pXYdn1TNaxEUoZYuk7XuI3LFo7GIU9HFvNF/j3pgOEB/c13g1HioMEuGbdOibU463W9nsvKKuoGzQ6y4UNJXCQx9j1QhNXqhxZ0ej9Ua0MrqH7w7VFL3ORjvi2yU3MuzR7xbsjmcRpeY+9sSw4+GIpylJ0TsmeTyDE9MlZruUy1WGv/cG5XQMrEzH6WoAAAAASUVORK5CYII="
   },
-  "description": "Example template implementation of The Trade Desk Conversion Events JS SDK for client side conversion capture, sending to The Trade Desk Real-Time Conversion Events API.",
+  "description": "A template that captures client-side conversion and sends them to The Trade Desk Real-Time Conversion Events API.",
   "containerContexts": [
     "WEB"
   ]
@@ -427,7 +428,7 @@ ___TEMPLATE_PARAMETERS___
 ___SANDBOXED_JS_FOR_WEB_TEMPLATE___
 
 /*************************************************************
- * A sample TheTradeDesk Conversion SDK Template
+ * The Trade Desk Conversion SDK Template
  * - Attempts to only load dependant external javascript once per page. Does so by checking if required functions are already available in the 'window' object, and making use of 'inject script' caching.
  ************************************************************/
 // load Google APIs
