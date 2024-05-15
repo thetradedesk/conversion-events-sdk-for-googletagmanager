@@ -965,9 +965,9 @@ scenarios:
   - name: Basic test (no products)
     code: |-
       const mockData = {
-          "adv": "lljjz43",
+          "adv": "example",
           "tag_type": "upixel_id",
-          "upixel_id": "9l3ckzx",
+          "upixel_id": "example",
           "referrer_url": "https://testurl/",
           "event_name": "page_view",
           "order_id": "order1234",
