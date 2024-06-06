@@ -1,6 +1,14 @@
 homepage: https://github.com/thetradedesk/conversion-events-sdk-for-googletagmanager
 documentation: https://github.com/thetradedesk/conversion-events-sdk-for-googletagmanager
 versions:
+  - sha: 84c6998716e4c401eca5f884219412e7ed690bca
+    changeNotes: |
+      ## 1.1.0
+
+      ### Minor Changes
+
+      -   c4a5ee4: - Fix race condition, cleanups
+          -   Added custom parameters and Impression ID
   - sha: 7fe5e9df78bd8590e775dde5e2719acfbde22399
     changeNotes: |
       ## 1.0.2
