@@ -219,13 +219,13 @@ ___TEMPLATE_PARAMETERS___
       {
         "type": "GROUP",
         "name": "item_mappings",
-        "displayName": "Mappings: Item/Product field to TTD API Item field",
+        "displayName": "Mappings: Item/Product parameter to TTD API Item parameter",
         "groupStyle": "NO_ZIPPY",
         "subParams": [
           {
             "type": "LABEL",
             "name": "label1",
-            "displayName": "For each item/product within the list specified above, enter the name of the item/product object field that contains the required value. Note: simply enter a field name, rather than a variable that holds the value.\u003cbr/\u003e\u003cbr/\u003eCan be tailored to the required schema being used. Defaults to GA4 schema."
+            "displayName": "For each item/product within the list specified above, enter the name of the item/product object parameter that contains the required value. Note: simply enter a parameter name, rather than a variable that returns the value of that parameter.\u003cbr/\u003e\u003cbr/\u003eCan be tailored to the required schema being used. Defaults to GA4 schema."
           },
           {
             "type": "TEXT",
@@ -348,6 +348,49 @@ ___TEMPLATE_PARAMETERS___
   },
   {
     "type": "GROUP",
+    "name": "attribution",
+    "displayName": "Attribution Override",
+    "groupStyle": "ZIPPY_CLOSED",
+    "subParams": [
+      {
+        "type": "TEXT",
+        "name": "imp",
+        "displayName": "Impression ID",
+        "simpleValueType": true,
+        "help": "A 36-character string (including dashes) that serves as the unique ID for the impression that was bought via The Trade Desk, to which the event is attributed."
+      }
+    ]
+  },
+  {
+    "type": "GROUP",
+    "name": "group_userdefined",
+    "displayName": "User Defined API Parameters",
+    "groupStyle": "ZIPPY_CLOSED",
+    "subParams": [
+      {
+        "type": "SIMPLE_TABLE",
+        "name": "userdefined",
+        "displayName": "Parameter Entry",
+        "simpleTableColumns": [
+          {
+            "defaultValue": "",
+            "displayName": "Parameter",
+            "name": "parameter",
+            "type": "TEXT"
+          },
+          {
+            "defaultValue": "",
+            "displayName": "Value",
+            "name": "value",
+            "type": "TEXT"
+          }
+        ],
+        "help": "Use this table to add any parameters that you need to send that are not supported by the template."
+      }
+    ]
+  },
+  {
+    "type": "GROUP",
     "name": "advanced",
     "displayName": "SDK Advanced Technical Settings",
     "groupStyle": "ZIPPY_CLOSED",
@@ -429,194 +472,44 @@ ___SANDBOXED_JS_FOR_WEB_TEMPLATE___
 
 /*************************************************************
  * The Trade Desk Conversion SDK Template
- * - Attempts to only load dependant external javascript once per page. Does so by checking if required functions are already available in the 'window' object, and making use of 'inject script' caching.
+ * - Simplifies implementation of the Conversion SDK - no Javascript knowledge required.
+ * - Automatically takes care of loading the hosted SDK Javascript and initialisation steps, if needed.
+ * - Simplifies mapping of product 'item' lists from one format to TTD format. (e.g. GA4 items schema to TTD items schema)
  ************************************************************/
-// load Google APIs
+
+/***********************************************
+ * IMPORTS / CONSTANTS
+ **********************************************/
+// import Google APIs
 const logToConsole = require('logToConsole');
 const injectScript = require('injectScript');
 const createArgumentsQueue = require('createArgumentsQueue');
 const queryPermission = require('queryPermission');
 const JSON = require('JSON');
 const callInWindow = require('callInWindow');
-//const getUrl = require("getUrl");
 const copyFromWindow = require('copyFromWindow');
 const setInWindow = require('setInWindow');
 
 //logging settings
-const cfgLogToGTM = true;
-var cfgLogToDummyPixel = false;
-const doNothing = () => {}; //empty function to provide as a callback argument
-
-//exceptional logging... for visibility during callbacks (GTM preview's logging doesn't work there)
-/*
-cfgLogToDummyPixel = true;
-const cfgDummyPixelUrl = 'https://logtoconsole.adsrvr.org/';
-const sendPixel = require('sendPixel'); //delete later
-*/
+const cfgLogToGTM = true; //even if true, GTM template defaults to only showing the logging in Debug/Preview modes
 
 //Register TTD Conversion SDK globals (scripts / functions)
-const sdk_url = data.sdk_url;
-const sdk_cache_token = sdk_url;
-const sdk_function_name = data.sdk_function_name;
-const sdk_events_layer = data.sdk_events_layer;
-const sdk_cookie_sync = data.sdk_cookie_sync;
+const sdk_url = data.sdk_url; //URL of SDK javascript file
+const sdk_cache_token = sdk_url; //token to use for caching (URL of SDK)
+const sdk_function_name = data.sdk_function_name; //main SDK function
+const sdk_events_layer = data.sdk_events_layer; //events layer/queue
+const sdk_cookie_sync = data.sdk_cookie_sync; //boolean: whether cookie syncing is enabled on init event
 
-//dump data object
-logToConsole('data=', data);
+//empty function to provide as a callback argument
+const doNothing = () => {};
 
 /***********************************************
  * Wrapper function for logging to console.
  * - calls regular GTM logging API.
- * - could be modified to add other logging techniques later.
+ * - could be modified to add other logging techniques later, such as string prefixes for messages, error levels etc.
  **********************************************/
 const log = (logMsg) => {
     if (cfgLogToGTM) logToConsole(logMsg);
-    //if(cfgLogToDummyPixel) sendPixel(cfgDummyPixelUrl+logMsg, doNothing, doNothing); //delete later
-};
-
-/***********************************************
- * Function to initiate firing of up to TWO TTD Universal Pixels.
- * - only run this after Universal Pixel code has been loaded.
- * - calls the required data.gtmOnSuccess() at end of function to indicate success/completion.
- **********************************************/
-const fireEvent = () => {
-    log('Script LOADED - Firing SDK EVENTS...');
-
-    var ttd_event = genTTDEvent(data);
-
-    //add additional product items, if there are any, mapping them to the TTD API fields for Items
-    var mappedItems = extractMappedItems(data);
-    log('mapped items=' + JSON.stringify(mappedItems));
-    if (mappedItems) {
-        ttd_event.items = mappedItems;
-    }
-
-    ttdConversionEvents('event', ttd_event);
-
-    log('Finished successfully');
-    //tell GTM we finished successfully
-    data.gtmOnSuccess();
-    log(data.gtmOnSuccess);
-};
-
-//extract item level data from an items list, using provided mappings
-var extractMappedItems = function (input) {
-    //skip if no items data is provided
-    if (!hasValue(input, 'items')) return null;
-
-    var items_src = input.items;
-
-    var item_mapping_fields = [
-        //TTD API Item Field, Name of template field containing the name of corresponding key in provided items
-        ['item_code', 'item_mapping_item_code'],
-        ['name', 'item_mapping_name'],
-        ['qty', 'item_mapping_qty'],
-        ['price', 'item_mapping_price'],
-        ['cat', 'item_mapping_cat'],
-    ];
-
-    //check type is a list/array ?
-    //may be able to simplify by using standard JS map() function
-
-    var items = [];
-
-    for (let i = 0; i < items_src.length; i++) {
-        var item = {};
-        for (let k = 0; k < item_mapping_fields.length; k++) {
-            var item_src = items_src[i];
-            var field_ttd = item_mapping_fields[k][0];
-            var field_src_mapping = item_mapping_fields[k][1];
-            //log(item_src, field_ttd, field_src_mapping);
-
-            if (
-                hasValue(input, field_src_mapping) &&
-                hasValue(item_src, input[field_src_mapping])
-            ) {
-                item[field_ttd] = item_src[input[field_src_mapping]];
-            }
-        }
-
-        //add the item if it has any data added
-        if (item !== {}) items.push(item);
-    }
-
-    if (items !== []) return items;
-    else return null;
-};
-
-//function that returns true if a key is defined within an object
-var hasValue = function (obj, key) {
-    if (typeof obj[key] === 'undefined') {
-        //log('Key '+key+' NOT defined.');
-        return false;
-    } else {
-        //log('Key '+key+' defined.');
-        return true;
-    }
-};
-
-//Function that generates a TTD Event from input data on the GTM Template
-//At the moment this is arguably redundant as GTM will handle nearly everything. But will be easier to add adaptions/transforms and options later if needed
-var genTTDEvent = function (input) {
-    var event = {};
-
-    //populate relevant tag ID by tag type selected
-    if (hasValue(input, input.tag_type))
-        event[input.tag_type] = input[input.tag_type];
-
-    //event
-    if (hasValue(input, 'event_name')) event.event_name = input.event_name;
-
-    //page URL
-    if (hasValue(input, 'referrer_url'))
-        event.referrer_url = input.referrer_url;
-
-    //order details
-    if (hasValue(input, 'order_id')) event.order_id = input.order_id;
-    if (hasValue(input, 'value')) event.value = input.value;
-    if (hasValue(input, 'currency')) event.currency = input.currency;
-
-    //custom values
-    if (hasValue(input, 'td1')) event.td1 = input.td1;
-    if (hasValue(input, 'td2')) event.td2 = input.td2;
-    if (hasValue(input, 'td3')) event.td3 = input.td3;
-    if (hasValue(input, 'td4')) event.td4 = input.td4;
-    if (hasValue(input, 'td5')) event.td5 = input.td5;
-    if (hasValue(input, 'td6')) event.td6 = input.td6;
-    if (hasValue(input, 'td7')) event.td7 = input.td7;
-    if (hasValue(input, 'td8')) event.td8 = input.td8;
-    if (hasValue(input, 'td9')) event.td9 = input.td9;
-    if (hasValue(input, 'td10')) event.td10 = input.td10;
-
-    return event;
-};
-
-/***********************************************
- * Function to handle a failed load of the external Universal Pixel script.
- * - run as a callback on script load failure, and tells GTM the tag failed.
- **********************************************/
-const onLoadFail = () => {
-    log('Script load FAILED.');
-    data.gtmOnFailure();
-};
-
-/***********************************************
- * Function to check if a variable in the window scope is defined, accessible, and of the expected type
- * - determined by checking whether 'ttd_up_api' is defined in the 'window'
- * - returns true (loaded) or false (not loaded).
- **********************************************/
-const isWindowVarAvailable = (window_var_name, type) => {
-    log(
-        'Checking if Global/Window variable is available and expected type. var: ' +
-            window_var_name +
-            ', type: ' +
-            type
-    );
-    var window_var = copyFromWindow(window_var_name);
-    log(typeof window_var);
-    if (typeof window_var === type) {
-        return true;
-    } else return false;
 };
 
 /***********************************************
@@ -628,6 +521,11 @@ const isSDKLoaded = function () {
     return isWindowVarAvailable(data.sdk_object_name, 'object');
 };
 
+/***********************************************
+ * Function to check if SDK has been given an init event
+ * - note: doesn't confirm if the event has actually been fired or not
+ * - returns true (init event found in queu) or false (no init event in queue).
+ **********************************************/
 const isSDKInitialised = function () {
     log('isSDKInitialised()');
     var ttdConversionEventsLayer = copyFromWindow(data.sdk_events_layer);
@@ -640,27 +538,6 @@ const isSDKInitialised = function () {
         }
     }
     return false;
-};
-
-//add init event into the queue
-const initSDK = function () {
-    //enableCookieSyncing: true
-    var initEventObj = {};
-
-    //rely on template field rules to ensure (only) one of these is set
-    if (hasValue(data, 'merchant_id'))
-        initEventObj.merchantId = data.merchant_id;
-    if (hasValue(data, 'adv')) initEventObj.advertiserId = data.adv;
-
-    initEventObj.enableCookieSyncing =
-        data.sdk_cookie_sync === 1 ? true : false;
-    initEventObj.enableDebug = data.sdk_enable_debug === 1 ? true : false;
-
-    log('Add initialisation to argument queue');
-    log(initEventObj);
-
-    ttdConversionEvents('init', initEventObj);
-    //return true;
 };
 
 /***********************************************
@@ -695,76 +572,266 @@ const injectSDKScript = (url, onsuccess, onfail, cache_token) => {
     }
 };
 
-//create arguments queue for the SDK (won't overwrite if already defined)
-const ttdConversionEvents = createArgumentsQueue(
-    data.sdk_function_name,
-    data.sdk_events_layer
-);
+/***********************************************
+ * Add an event to Events Layer queue
+ * - parameters: event_name (string, name of event), event (object)
+ **********************************************/
+const addEventToEventsLayer = function (event_name, event) {
+    log('addEventToQueue("' + event_name + '", (object below)');
+    log(event);
+    //create/get arguments queue (won't overwrite if it already exists)
+    var ttdConversionEvents = createArgumentsQueue(
+        data.sdk_function_name,
+        data.sdk_events_layer
+    );
+    ttdConversionEvents(event_name, event);
+};
 
-if (!isSDKInitialised()) {
-    initSDK();
+/***********************************************
+ * Generate an Init event and add it to the queue
+ **********************************************/
+const fireInitEvent = function () {
+    //enableCookieSyncing: true
+    var initEventObj = {};
+
+    //rely on template field rules to ensure (only) one of these is set
+    if (hasValue(data, 'merchant_id'))
+        initEventObj.merchantId = data.merchant_id;
+    if (hasValue(data, 'adv')) initEventObj.advertiserId = data.adv;
+
+    initEventObj.enableCookieSyncing =
+        data.sdk_cookie_sync === 1 ? true : false;
+    initEventObj.enableDebug = data.sdk_enable_debug === 1 ? true : false;
+
+    log('Add initialisation object to argument queue');
+    log(initEventObj);
+
+    addEventToEventsLayer('init', initEventObj);
+    //return true;
+};
+
+/***********************************************
+ * Generate the user event from input data (typically variables sourcing from the GTM Data Layer) and add the event to the TTD Events Layer, which will send it to TTD's Real Time Conversion API
+ * - Expects the TTD Events Layer queue to already be initialised
+ **********************************************/
+const fireEvent = (data) => {
+    log('Adding event to queue...');
+
+    var ttd_event = generateTTDEvent(data);
+
+    addEventToEventsLayer('event', ttd_event);
+
+    log('Event added to queue');
+};
+
+/***********************************************
+ * Extract item level data from an items list, and convert to TTD schema, using user provided mappings
+ **********************************************/
+var extractMappedItems = function (input) {
+    //skip if no items data is provided
+    if (!hasValue(input, 'items')) return null;
+
+    var items_src = input.items;
+
+    //TTD API Item Field, Name of template field containing the name of corresponding key in provided items
+    var item_mapping_fields = [
+        ['item_code', 'item_mapping_item_code'],
+        ['name', 'item_mapping_name'],
+        ['qty', 'item_mapping_qty'],
+        ['price', 'item_mapping_price'],
+        ['cat', 'item_mapping_cat'],
+    ];
+
+    var items = [];
+
+    //work through each item to map it to TTD schema
+    for (let i = 0; i < items_src.length; i++) {
+        var item = {};
+        for (let k = 0; k < item_mapping_fields.length; k++) {
+            var item_src = items_src[i];
+            var field_ttd = item_mapping_fields[k][0];
+            var field_src_mapping = item_mapping_fields[k][1];
+            //log(item_src, field_ttd, field_src_mapping);
+
+            if (
+                hasValue(input, field_src_mapping) &&
+                hasValue(item_src, input[field_src_mapping])
+            ) {
+                item[field_ttd] = item_src[input[field_src_mapping]];
+            }
+        }
+
+        //add the item if it has any data added
+        if (item !== {}) items.push(item);
+    }
+
+    if (items !== []) return items;
+    else return null;
+};
+
+/***********************************************
+ * Function that returns true if a key is defined within an object
+ **********************************************/
+var hasValue = function (obj, key) {
+    if (typeof obj[key] === 'undefined') {
+        return false;
+    } else {
+        return true;
+    }
+};
+
+/***********************************************
+ * Function that generates an event object per TTD schema, from input data provided in the GTM Template.
+ * - At the moment this is mostly redundant as its simply copying most properties from one object to another.
+ * - But it means we end up with an object only containing supported fields provides an easy place to add adaptions/transforms.
+ * - Note: Doesn't handle item list transformation, or merging of User Defined API Parameters. These needs to be done in addition.
+ **********************************************/
+var generateTTDEvent = function (input) {
+    var event = {};
+
+    //populate relevant tag ID by tag type selected
+    if (hasValue(input, input.tag_type))
+        event[input.tag_type] = input[input.tag_type];
+
+    //event
+    if (hasValue(input, 'event_name')) event.event_name = input.event_name;
+
+    //page URL
+    if (hasValue(input, 'referrer_url'))
+        event.referrer_url = input.referrer_url;
+
+    //order details
+    if (hasValue(input, 'order_id')) event.order_id = input.order_id;
+    if (hasValue(input, 'value')) event.value = input.value;
+    if (hasValue(input, 'currency')) event.currency = input.currency;
+
+    //custom values
+    if (hasValue(input, 'td1')) event.td1 = input.td1;
+    if (hasValue(input, 'td2')) event.td2 = input.td2;
+    if (hasValue(input, 'td3')) event.td3 = input.td3;
+    if (hasValue(input, 'td4')) event.td4 = input.td4;
+    if (hasValue(input, 'td5')) event.td5 = input.td5;
+    if (hasValue(input, 'td6')) event.td6 = input.td6;
+    if (hasValue(input, 'td7')) event.td7 = input.td7;
+    if (hasValue(input, 'td8')) event.td8 = input.td8;
+    if (hasValue(input, 'td9')) event.td9 = input.td9;
+    if (hasValue(input, 'td10')) event.td10 = input.td10;
+
+    //Attribution override - impression id
+    if (hasValue(input, 'imp')) event.imp = input.imp;
+
+    //add additional product items, if there are any, mapping them to the TTD API fields for Items
+    var mappedItems = extractMappedItems(input);
+    log('mapped items=' + JSON.stringify(mappedItems));
+    if (mappedItems) {
+        event.items = mappedItems;
+    }
+
+    //merge user defined parameters into the event
+    event = mergeUserDefinedParams(event, input.userdefined);
+
+    return event;
+};
+
+/***********************************************
+ * Extract User Defined Parameters
+ *
+ * @param {object} event - the event to add the parameters to.
+ * @param {array} userdefined - the array of user defined parameter objects (key value pairs)
+ * @return {object} event - Always returns the event with user defined parameters added. Will be unchanged if mapping of user defined parameters was unsuccessful or there weren't any parameters to merge.
+ */
+const mergeUserDefinedParams = function (event, userdefined) {
+    //skip if no userdefined event data is provided
+    if (!userdefined) return event;
+
+    //validate type is a list/array ?
+
+    for (var i in userdefined) {
+        var pair = userdefined[i];
+        var parameter = pair.parameter;
+        var value = pair.value;
+        if (hasValue(event, parameter)) {
+            log(
+                'Cannot overwrite existing parameter [' +
+                    parameter +
+                    '] with User Defined Parameter'
+            );
+            continue;
+        }
+
+        //add the parameter to the event
+        event[parameter] = value;
+    }
+
+    return event;
+};
+
+/***********************************************
+ * Function to handle a failed load of the external Universal Pixel script.
+ * - run as a callback on script load failure.
+ * - As this is likely called asynchronously, any logged messages may not appear.
+ **********************************************/
+const onLoadFail = () => {
+    log('Script load FAILED.');
+    //data.gtmOnFailure();
+};
+
+/***********************************************
+ * Function to check if a variable in the window scope is defined, accessible, and of the expected type
+ * - determined by checking whether 'window_var_name' is defined in the 'window'
+ * - returns true (exists and expected type) otherwise false.
+ **********************************************/
+const isWindowVarAvailable = (window_var_name, type) => {
+    log(
+        'Checking if Global/Window variable is available and expected type. var: ' +
+            window_var_name +
+            ', type: ' +
+            type
+    );
+    var window_var = copyFromWindow(window_var_name);
+    log(typeof window_var);
+    if (typeof window_var === type) {
+        return true;
+    } else return false;
+};
+
+/***********************************************
+ * Check if Events Layer queue has been created
+ * - returns true if it is found, false if not found
+ **********************************************/
+const isEventsLayerPresent = function () {
+    log('isEventsLayerPresent()');
+    var events_layer = copyFromWindow(data.sdk_events_layer);
+    if (typeof events_layer == 'object') {
+        log('Events layer FOUND');
+        return true;
+    } else {
+        log('Events layer NOT found');
+        return false;
+    }
+};
+
+/***********************************************
+ * EXECUTE
+ **********************************************/
+
+//dump data object
+log('DATA....');
+log(data);
+
+//If its the first event being handled on this page, make sure to initialise the queue and inject the script.
+if (!isEventsLayerPresent()) {
+    fireInitEvent();
+    injectSDKScript(sdk_url, doNothing, doNothing);
 }
 
-if (!isSDKLoaded()) {
-    injectSDKScript(sdk_url, fireEvent, onLoadFail);
-} else fireEvent();
+//add Event to queue (dont need to know/care if the script is downloaded yet)
+fireEvent(data);
 
-/*
-//EXAMPLE EVENT PUSH (normal JS SDK usage)
-ttdConversionEvents("event", {
-  tracker_id: "hc7ihke",
-  value: 25.97,
-  currency: "USD",
-  event_name: "First Purchase",
-  adid: "<uid here>",
-  adid_type: "UID2",
-  order_id: "abc123XyZ",
-  items: [
-    {
-      item_code: "#3234567894",
-      name: "Lemon Sandwich Creme Cookies, Family Size, 25 oz",
-      qty: 2,
-      price: 9.99,
-      cat: "1110"
-    },
-    {
-      item_code: "#2234567892",
-      name: "Chocolate & Vanilla Sandwich Cookies, 16 oz",
-      qty: 1,
-      price: 5.99,
-      cat: "1110"
-    },
-  ],
-  td1: "Spring 2022 Promo" // A custom field
-});
+log('Main execution finished (asynchronous tasks may still be pending)');
 
-
-
-GA4 style data layer event...
-
-window.dataLayer.push({'event':'purchase','ecommerce':{
-    'value':13.49,
-    'currency':'USD',
-    'items':[
-        {
-            'item_id': 'item1234',
-            'item_name': 'Washing Liquid',
-            'unsupported_field':'unknown999',
-            'item_category': 'Laundry',
-            'price': 5.99,
-            'quantity': 1
-        },
-        {
-            'item_id': 'item6789',
-            'item_name': 'Hand Soap',
-            'unsupported_field':'unknown765',
-            'item_category': 'Hygiene',
-            'price': 2.50,
-            'quantity': 3
-        }
-    ]
-}});
-*/
+//tell GTM we finished main execution
+data.gtmOnSuccess();
 
 
 ___WEB_PERMISSIONS___
@@ -993,7 +1060,7 @@ scenarios:
       //
       
       // Verify that the tag finished successfully.
-      //assertApi('gtmOnSuccess').wasCalled(); //doesn't work with the callback for the script load
+      assertApi('gtmOnSuccess').wasCalled(); //doesn't work with the callback for the script load
 
 
 ___NOTES___
