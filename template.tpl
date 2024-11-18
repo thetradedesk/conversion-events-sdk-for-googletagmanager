@@ -689,6 +689,9 @@ var hasValue = function (obj, key) {
 var generateTTDEvent = function (input) {
     var event = {};
 
+    if (hasValue(input, 'merchant_id')) event.merchantId = input.merchant_id;
+    if (hasValue(input, 'adv')) event.adv = input.adv;
+
     //populate relevant tag ID by tag type selected
     if (hasValue(input, input.tag_type))
         event[input.tag_type] = input[input.tag_type];
