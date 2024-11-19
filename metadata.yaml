@@ -1,6 +1,13 @@
 homepage: https://github.com/thetradedesk/conversion-events-sdk-for-googletagmanager
 documentation: https://github.com/thetradedesk/conversion-events-sdk-for-googletagmanager
 versions:
+  - sha: 5c98c16ee2b4e2876af685b64ebc7c3d145bf502
+    changeNotes: |
+      ## 1.3.1
+
+      ### Patch Changes
+
+      -   29df76a: Fix merchant ID for fireEvent
   - sha: 3beaaed2daa19181e1d80a0807cc9999a8129dfb
     changeNotes: |
       ## 1.3.0
