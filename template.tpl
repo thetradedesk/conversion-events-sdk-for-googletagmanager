@@ -591,7 +591,6 @@ const addEventToEventsLayer = function (event_name, event) {
  * Generate an Init event and add it to the queue
  **********************************************/
 const fireInitEvent = function () {
-    //enableCookieSyncing: true
     var initEventObj = {};
 
     //rely on template field rules to ensure (only) one of these is set
@@ -607,7 +606,6 @@ const fireInitEvent = function () {
     log(initEventObj);
 
     addEventToEventsLayer('init', initEventObj);
-    //return true;
 };
 
 /***********************************************
