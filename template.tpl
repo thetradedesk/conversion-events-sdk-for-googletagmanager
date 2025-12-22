@@ -776,7 +776,7 @@ const mergeUserDefinedParams = function (event, userdefined) {
  **********************************************/
 const onLoadFail = () => {
     log('Script load FAILED.');
-    //data.gtmOnFailure();
+    data.gtmOnFailure();
 };
 
 /***********************************************
