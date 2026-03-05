@@ -1012,7 +1012,7 @@ ___WEB_PERMISSIONS___
                         "listItem": [
                             {
                                 "type": 1,
-                                "string": "https://js.adsrvr.org/conversionEvents-v1.min.js"
+                                "string": "https://js.adsrvr.org/up_loader.3.0.0.js"
                             }
                         ]
                     }
