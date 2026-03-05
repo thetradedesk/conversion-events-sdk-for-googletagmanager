@@ -437,8 +437,8 @@ ___TEMPLATE_PARAMETERS___
         "name": "sdk_url",
         "displayName": "TTD Conversion Javascript SDK URL",
         "simpleValueType": true,
-        "defaultValue": "https://js.adsrvr.org/conversionEvents-v1.min.js",
-        "help": "Default is \u0027https://js.adsrvr.org/conversionEvents-v1.min.js\u0027"
+        "defaultValue": "https://js.adsrvr.org/up_loader.3.0.0.js",
+        "help": "Default is \u0027https://js.adsrvr.org/up_loader.3.0.0.js\u0027"
       },
       {
         "type": "TEXT",
@@ -1089,7 +1089,7 @@ scenarios:
           "sdk_enable_debug": 1,
           "sdk_function_name": "ttdConversionEvents",
           "sdk_object_name": "TTDConversionEvents",
-          "sdk_url": "https://js.adsrvr.org/conversionEvents-v1.min.js",
+          "sdk_url": "https://js.adsrvr.org/up_loader.3.0.0.js",
           "sdk_events_layer": "ttdConversionEventsLayer"
       };
       
@@ -1108,7 +1108,7 @@ scenarios:
           "sdk_enable_debug": 1,
           "sdk_function_name": "ttdConversionEvents",
           "sdk_object_name": "TTDConversionEvents",
-          "sdk_url": "https://js.adsrvr.org/conversionEvents-v1.min.js",
+          "sdk_url": "https://js.adsrvr.org/up_loader.3.0.0.js",
           "sdk_events_layer": "ttdConversionEventsLayer"
       };
       
