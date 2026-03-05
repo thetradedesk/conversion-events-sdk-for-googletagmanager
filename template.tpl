@@ -266,6 +266,14 @@ ___TEMPLATE_PARAMETERS___
             "simpleValueType": true,
             "defaultValue": "item_category",
             "valueHint": "item_category"
+          },
+          {
+            "type": "TEXT",
+            "name": "item_mapping_brand",
+            "displayName": "Brand (item_brand)",
+            "simpleValueType": true,
+            "defaultValue": "item_brand",
+            "valueHint": "item_brand"
           }
         ]
       }
@@ -638,6 +646,7 @@ var extractMappedItems = function (input) {
         ['qty', 'item_mapping_qty'],
         ['price', 'item_mapping_price'],
         ['cat', 'item_mapping_cat'],
+        ['item_brand', 'item_mapping_brand'],
     ];
 
     var items = [];
@@ -1046,6 +1055,7 @@ scenarios:
           "item_mapping_price": "price",
           "item_mapping_qty": "quantity",
           "item_mapping_cat": "item_category",
+          "item_mapping_brand": "item_brand",
           "sdk_cookie_sync": 0,
           "sdk_enable_debug": 1,
           "sdk_function_name": "ttdConversionEvents",
