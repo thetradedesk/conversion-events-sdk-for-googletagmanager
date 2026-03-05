@@ -471,16 +471,16 @@ ___TEMPLATE_PARAMETERS___
         "macrosInSelect": false,
         "selectItems": [
           {
-            "value": 0,
-            "displayValue": "No"
-          },
-          {
             "value": 1,
             "displayValue": "Yes"
+          },
+          {
+            "value": 0,
+            "displayValue": "No"
           }
         ],
         "simpleValueType": true,
-        "defaultValue": 0
+        "defaultValue": 1
       },
       {
         "type": "SELECT",
@@ -1085,7 +1085,7 @@ scenarios:
           "item_mapping_qty": "quantity",
           "item_mapping_cat": "item_category",
           "item_mapping_brand": "item_brand",
-          "sdk_cookie_sync": 0,
+          "sdk_cookie_sync": 1,
           "sdk_enable_debug": 1,
           "sdk_function_name": "ttdConversionEvents",
           "sdk_object_name": "TTDConversionEvents",
@@ -1104,7 +1104,7 @@ scenarios:
           "upixel_id": "example-legacy",
           "referrer_url": "https://testurl/",
           "event_name": "page_view",
-          "sdk_cookie_sync": 0,
+          "sdk_cookie_sync": 1,
           "sdk_enable_debug": 1,
           "sdk_function_name": "ttdConversionEvents",
           "sdk_object_name": "TTDConversionEvents",
