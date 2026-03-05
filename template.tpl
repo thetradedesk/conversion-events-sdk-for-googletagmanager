@@ -104,16 +104,20 @@ ___TEMPLATE_PARAMETERS___
     "selectItems": [
       {
         "value": "tracker_id",
-        "displayValue": "Event Tracker"
+        "displayValue": "Event Tracker [Deprecated, use Pixel IDs instead]"
       },
       {
         "value": "upixel_id",
-        "displayValue": "Universal Pixel"
+        "displayValue": "Universal Pixel [Deprecated, use Pixel IDs instead]"
+      },
+      {
+        "value": "pixel_ids",
+        "displayValue": "TTD Pixel IDs"
       }
     ],
     "simpleValueType": true,
     "help": "Choose the type of tracking tag",
-    "defaultValue": "tracker_id",
+    "defaultValue": "pixel_ids",
     "alwaysInSummary": true,
     "valueValidators": [
       {
@@ -124,7 +128,7 @@ ___TEMPLATE_PARAMETERS___
   {
     "type": "TEXT",
     "name": "tracker_id",
-    "displayName": "Tracker ID",
+    "displayName": "Tracker ID [Deprecated, use Pixel IDs instead]",
     "simpleValueType": true,
     "alwaysInSummary": true,
     "valueValidators": [
@@ -132,7 +136,7 @@ ___TEMPLATE_PARAMETERS___
         "type": "NON_EMPTY"
       }
     ],
-    "help": "The platform ID of the event tracker (Image pixel ID)",
+    "help": "[DEPRECATED] The platform ID of the event tracker (Image pixel ID)",
     "enablingConditions": [
       {
         "paramName": "tag_type",
@@ -144,9 +148,9 @@ ___TEMPLATE_PARAMETERS___
   {
     "type": "TEXT",
     "name": "upixel_id",
-    "displayName": "Universal Pixel ID",
+    "displayName": "Universal Pixel ID [Deprecated, use Pixel IDs instead]",
     "simpleValueType": true,
-    "help": "The platform ID of the event tracker (Universal Pixel ID)",
+    "help": "[DEPRECATED] The platform ID of the event tracker (Universal Pixel ID)",
     "alwaysInSummary": true,
     "valueValidators": [
       {
@@ -157,6 +161,26 @@ ___TEMPLATE_PARAMETERS___
       {
         "paramName": "tag_type",
         "paramValue": "upixel_id",
+        "type": "EQUALS"
+      }
+    ]
+  },
+  {
+    "type": "TEXT",
+    "name": "pixel_ids",
+    "displayName": "TTD Pixel IDs",
+    "simpleValueType": true,
+    "help": "The platform IDs of the event tracker for merchant event mappings, and/or the universal pixel ID of the event for URL mappings. If providing multiple, provide them as a comma separated list.",
+    "alwaysInSummary": true,
+    "valueValidators": [
+      {
+        "type": "NON_EMPTY"
+      }
+    ],
+    "enablingConditions": [
+      {
+        "paramName": "tag_type",
+        "paramValue": "pixel_ids",
         "type": "EQUALS"
       }
     ]
@@ -282,6 +306,11 @@ ___TEMPLATE_PARAMETERS___
       {
         "paramName": "tag_type",
         "paramValue": "tracker_id",
+        "type": "EQUALS"
+      },
+      {
+        "paramName": "tag_type",
+        "paramValue": "pixel_ids",
         "type": "EQUALS"
       }
     ]
@@ -699,7 +728,7 @@ var generateTTDEvent = function (input) {
     if (hasValue(input, 'merchant_id')) event.merchant_id = input.merchant_id;
     if (hasValue(input, 'adv')) event.adv = input.adv;
 
-    //populate relevant tag ID by tag type selected
+    //populate selected tag ID key; pixel_ids is preferred, legacy keys remain supported
     if (hasValue(input, input.tag_type))
         event[input.tag_type] = input[input.tag_type];
 
@@ -1043,8 +1072,8 @@ scenarios:
     code: |-
       const mockData = {
           "adv": "example",
-          "tag_type": "upixel_id",
-          "upixel_id": "example",
+          "tag_type": "pixel_ids",
+          "pixel_ids": "example",
           "referrer_url": "https://testurl/",
           "event_name": "page_view",
           "order_id": "order1234",
@@ -1064,14 +1093,28 @@ scenarios:
           "sdk_events_layer": "ttdConversionEventsLayer"
       };
       
-      // Call runCode to run the template's code.
       runCode(mockData);
       
-      //check network tab in browser to see requests
-      //
-      
-      // Verify that the tag finished successfully.
       assertApi('gtmOnSuccess').wasCalled(); //doesn't work with the callback for the script load
+  - name: Backward compatibility test (legacy upixel_id)
+    code: |-
+      const mockData = {
+          "adv": "example",
+          "tag_type": "upixel_id",
+          "upixel_id": "example-legacy",
+          "referrer_url": "https://testurl/",
+          "event_name": "page_view",
+          "sdk_cookie_sync": 0,
+          "sdk_enable_debug": 1,
+          "sdk_function_name": "ttdConversionEvents",
+          "sdk_object_name": "TTDConversionEvents",
+          "sdk_url": "https://js.adsrvr.org/conversionEvents-v1.min.js",
+          "sdk_events_layer": "ttdConversionEventsLayer"
+      };
+      
+      runCode(mockData);
+      
+      assertApi('gtmOnSuccess').wasCalled();
 
 
 ___NOTES___
