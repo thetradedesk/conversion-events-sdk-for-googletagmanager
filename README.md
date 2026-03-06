@@ -1,18 +1,27 @@
-# Conversion Events SDK Tag for Google Tag Manager
+# The Trade Desk Conversion Universal Pixel v3 SDK Tag for Google Tag Manager
+
+This file includes information to help you use The Trade Desk Conversion Universal Pixel v3 SDK in Google Tag Manager.
+
+Here's what you need to know to use this template:
+
+- The GTM data layer is typically used to collect relevant event data within GTM and provide it to The Trade Desk tags.
+- If your event names are different from the ones defined by The Trade Desk, you can add your own event names in The Trade Desk platform.
+
+For details, see [Item-Level Event Tracking Tag](https://open.thetradedesk.com/provider/docsApp/GuidesProvider/retail/doc/TrackingTagsEvents).
 
 # Installation and Usage
 
+For details, see [Implement Using Google Tag Manager](https://open.thetradedesk.com/provider/docsApp/GuidesProvider/retail/doc/TrackingTagsEvents#implement-gtm) in the *Item-Level Event Tracking Tag* documentation.
+
 ## Suggested Variables
 
-Some suggested variables and field mappings below:
+The following table shows some suggested variables and field mappings.
 
 |   Variable (choose your own name)   | Built-In/User-Defined |  GTM Variable Type  |                                                Value                                                |                                                                                                                                            Description                                                                                                                                            |       Template field            |
 |:-----------------------------------:|:---------------------:|:-------------------:|:---------------------------------------------------------------------------------------------------:|:-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------:|:-------------------------------:|
 |          TTD Advertiser ID          |     User-Defined      | Constant            |                                      (enter the Advertiser ID)                                      |                                                                                    The ID of the Advertiser within The Trade Desk platform. The Trade Desk Account Manager can help provide this information.                                                                                     |          Advertiser ID          |
 |           TTD Merchant ID           |     User-Defined      | Constant            |                                       (enter the Merchant ID)                                       |                                                                                The ID of the Merchant within The Trade Desk platform. The Trade Desk Account Manager can help provide this information, if needed.                                                                                |           Merchant ID           |
 |  TTD Pixel IDs                      |     User-Defined      | Constant            | (enter one or more comma-separated TTD Pixel IDs such as Universal Pixel ID and/or Tracking Tag ID) |    Primary/recommended ID field. Supports one ID or multiple IDs as a comma-separated list.                                                                                                                                                                                                       |          TTD Pixel IDs          |
-| TTD Universal Pixel ID [Deprecated] |  User-Defined         | Constant            |                                   (enter the Universal Pixel ID)                                    |                                                                                             Deprecated legacy field; still supported for backward compatibility. Prefer TTD Pixel IDs for new setups.                                                                                             | Universal Pixel ID [Deprecated] |
-|  TTD Tracking Tag ID [Deprecated]   |     User-Defined      | Constant            |                                     (enter the Tracking Tag ID)                                     |                                                                                             Deprecated legacy field; still supported for backward compatibility. Prefer TTD Pixel IDs for new setups.                                                                                             |  Tracking Tag ID [Deprecated]   |
 |              Page URL               |       Built-In        | URL                 |                                                                                                     |                                                                                                                          URL of the page the user is currently viewing.                                                                                                                           |            Page URL             |
 |                Event                |     User Defined      | Lookup Table        |                             (see Event Name Translation section below)                              | The name of the Event (e.g. 'purchase'). Use a lookup table to convert Google's Event names to the standard events supported by The Trade Desk. Alternatively, to define event names to be supported and configured by The Trade Desk, contact your Account Manager or Technical Account Manager. |           Event Name            |
 |     Data Layer - Transaction ID     |     User-Defined      | Data Layer Variable |                                      ecommerce.transaction_id                                       |                                                                                                                     The associated transaction/order identifier of the event.                                                                                                                     |            Order ID             |
@@ -22,7 +31,7 @@ Some suggested variables and field mappings below:
 
 
 ### Event Name Translation
-The Google Tag Manager or Google Analytics implementation may be using different Event names than is supported by the TTD Conversion Events SDK/API.
+The Google Tag Manager or Google Analytics implementation may be using different Event names than is supported by The Trade Desk Conversion Universal Pixel v3 SDK.
 
 This section describes how to set up an example Lookup Table variable to convert event names to the standard events supported by The Trade Desk. Alternatively, to define custom event names to be supported and configured by The Trade Desk, contact your Account Manager or Technical Account Manager.
 
@@ -57,33 +66,35 @@ The below are suggested translations of GA4 events to TTD events. You will need 
 Example/test ecommerce event being pushed to Google Tag Manager in Google Analytics 4 schema.
 ```javascript
 window.dataLayer.push(
-  {
-    'event':'purchase',
-    'ecommerce':{
-      'transaction_id':'order12345',
-      'value':13.49,
-      'currency':'USD',
-      'items':[
-        {
-            'item_id': 'item1234',
-            'item_name': 'Washing Liquid',
-            'unsupported_field':'unknown999',
-            'item_category': 'Laundry',
-            'price': 5.99,
-            'quantity': 1,
-            'item_brand': 'Laundry Brand'
-        },
-        {
-            'item_id': 'item6789',
-            'item_name': 'Hand Soap',
-            'unsupported_field':'unknown765',
-            'item_category': 'Hygiene',
-            'price': 2.50,
-            'quantity': 3,
-            'item_brand': 'Hygiene Brand'
+    {
+        'event': 'purchase',
+        'ecommerce': {
+            'transaction_id': 'order12345',
+            'value': 13.49,
+            'currency': 'USD',
+            'items': [
+                {
+                    'item_id': 'item1234',
+                    'item_name': 'Washing Liquid',
+                    'unsupported_field': 'unknown999',
+                    'item_category': 'Laundry',
+                    'price': 5.99,
+                    'quantity': 1,
+                    'item_brand': 'Laundry Brand'
+                },
+                {
+                    'item_id': 'item6789',
+                    'item_name': 'Hand Soap',
+                    'unsupported_field': 'unknown765',
+                    'item_category': 'Hygiene',
+                    'price': 2.50,
+                    'quantity': 3,
+                    'item_brand': 'Hygiene Brand'
+                }
+            ]
         }
-    ]
-}});
+    }
+);
 ```
 
 # License
