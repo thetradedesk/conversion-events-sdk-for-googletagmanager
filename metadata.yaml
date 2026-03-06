@@ -1,6 +1,17 @@
 homepage: https://github.com/thetradedesk/conversion-events-sdk-for-googletagmanager
 documentation: https://github.com/thetradedesk/conversion-events-sdk-for-googletagmanager
 versions:
+  - sha: 558db66a176d5c63a74542c0879292b977799673
+    changeNotes: |
+      ## 2.0.0
+
+      ### Major Changes
+
+      -   d647629: Migrate to Universal Pixel v3
+
+          -   Route requests to up_loader.3.0.0.js
+          -   pixel_ids parameter added — The tag template now supports a pixel_ids field, allowing you to pass additional pixel identifiers alongside the standard advertiser/merchant configuration.
+          -   item_brand field added to item model — Product/item data passed through conversion events can now include item_brand.
   - sha: 5c98c16ee2b4e2876af685b64ebc7c3d145bf502
     changeNotes: |
       ## 1.3.1
