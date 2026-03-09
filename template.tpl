@@ -50,7 +50,7 @@ ___TEMPLATE_PARAMETERS___
       }
     ],
     "simpleValueType": true,
-    "defaultValue": "merchant"
+    "defaultValue": "advertiser"
   },
   {
     "type": "TEXT",
