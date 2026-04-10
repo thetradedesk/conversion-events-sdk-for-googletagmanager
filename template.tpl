@@ -639,6 +639,9 @@ const fireInitEvent = function () {
         data.sdk_cookie_sync === 1 ? true : false;
     initEventObj.enableDebug = data.sdk_enable_debug === 1 ? true : false;
 
+    // Signal to SDK that this load originated from the GTM tag template
+    initEventObj.eventDataSource = 'JsSdkGtm';
+
     log('Add initialisation object to argument queue');
     log(initEventObj);
 
@@ -1115,6 +1118,29 @@ scenarios:
       runCode(mockData);
       
       assertApi('gtmOnSuccess').wasCalled();
+  - name: Init event includes eventDataSource JsSdkGtm
+    code: |-
+      const initCalls = [];
+      mock('createArgumentsQueue', function(fnName, layerName) {
+        return function(eventName, eventObj) {
+          initCalls.push({name: eventName, obj: eventObj});
+        };
+      });
+      const mockData = {
+          "adv": "example",
+          "tag_type": "pixel_ids",
+          "pixel_ids": "example",
+          "event_name": "page_view",
+          "sdk_cookie_sync": 1,
+          "sdk_enable_debug": 0,
+          "sdk_function_name": "ttdConversionEvents",
+          "sdk_object_name": "TTDConversionEvents",
+          "sdk_url": "https://js.adsrvr.org/up_loader.3.0.0.js",
+          "sdk_events_layer": "ttdConversionEventsLayer"
+      };
+      runCode(mockData);
+      assertThat(initCalls[0].name).isEqualTo('init');
+      assertThat(initCalls[0].obj.eventDataSource).isEqualTo('JsSdkGtm');
 
 
 ___NOTES___
