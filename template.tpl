@@ -189,7 +189,8 @@ ___TEMPLATE_PARAMETERS___
     "type": "TEXT",
     "name": "referrer_url",
     "displayName": "Page URL",
-    "simpleValueType": true
+    "simpleValueType": true,
+    "help": "The URL of the page where the conversion event occurs. Recommended: set this to the GTM built-in variable {{Page URL}}. This is especially important when this tag runs inside a cross-origin iframe (e.g. a tag manager hosted on a different domain), where the browser restricts automatic referrer detection to origin-only."
   },
   {
     "type": "TEXT",
@@ -638,6 +639,12 @@ const fireInitEvent = function () {
     initEventObj.enableCookieSyncing =
         data.sdk_cookie_sync === 1 ? true : false;
     initEventObj.enableDebug = data.sdk_enable_debug === 1 ? true : false;
+
+    // Pass the page URL to the SDK so it can use it for referrer detection.
+    // Critical for cross-origin iframe setups (e.g. GTM loaded in a separate-domain iframe)
+    // where the browser restricts document.referrer to origin-only.
+    if (hasValue(data, 'referrer_url'))
+        initEventObj.referrerUrl = data.referrer_url;
 
     // Signal to SDK that this load originated from the GTM tag template
     initEventObj.eventDataSource = 'JsSdkGtm';
@@ -1141,6 +1148,53 @@ scenarios:
       runCode(mockData);
       assertThat(initCalls[0].name).isEqualTo('init');
       assertThat(initCalls[0].obj.eventDataSource).isEqualTo('JsSdkGtm');
+  - name: Init event includes referrerUrl when Page URL is provided
+    code: |-
+      const initCalls = [];
+      mock('createArgumentsQueue', function(fnName, layerName) {
+        return function(eventName, eventObj) {
+          initCalls.push({name: eventName, obj: eventObj});
+        };
+      });
+      const mockData = {
+          "adv": "example",
+          "tag_type": "pixel_ids",
+          "pixel_ids": "example",
+          "referrer_url": "https://en.tripadvisor.com.hk/AttractionProductReview-g60763",
+          "event_name": "page_view",
+          "sdk_cookie_sync": 1,
+          "sdk_enable_debug": 0,
+          "sdk_function_name": "ttdConversionEvents",
+          "sdk_object_name": "TTDConversionEvents",
+          "sdk_url": "https://js.adsrvr.org/up_loader.3.0.0.js",
+          "sdk_events_layer": "ttdConversionEventsLayer"
+      };
+      runCode(mockData);
+      assertThat(initCalls[0].name).isEqualTo('init');
+      assertThat(initCalls[0].obj.referrerUrl).isEqualTo('https://en.tripadvisor.com.hk/AttractionProductReview-g60763');
+  - name: Init event omits referrerUrl when Page URL is not provided
+    code: |-
+      const initCalls = [];
+      mock('createArgumentsQueue', function(fnName, layerName) {
+        return function(eventName, eventObj) {
+          initCalls.push({name: eventName, obj: eventObj});
+        };
+      });
+      const mockData = {
+          "adv": "example",
+          "tag_type": "pixel_ids",
+          "pixel_ids": "example",
+          "event_name": "page_view",
+          "sdk_cookie_sync": 1,
+          "sdk_enable_debug": 0,
+          "sdk_function_name": "ttdConversionEvents",
+          "sdk_object_name": "TTDConversionEvents",
+          "sdk_url": "https://js.adsrvr.org/up_loader.3.0.0.js",
+          "sdk_events_layer": "ttdConversionEventsLayer"
+      };
+      runCode(mockData);
+      assertThat(initCalls[0].name).isEqualTo('init');
+      assertThat(initCalls[0].obj.referrerUrl).isEqualTo(undefined);
 
 
 ___NOTES___
