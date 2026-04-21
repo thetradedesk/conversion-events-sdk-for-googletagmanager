@@ -1,6 +1,13 @@
 homepage: https://github.com/thetradedesk/conversion-events-sdk-for-googletagmanager
 documentation: https://github.com/thetradedesk/conversion-events-sdk-for-googletagmanager
 versions:
+  - sha: cde0424881e8d7d32b97ac426ba41a8abc7731ff
+    changeNotes: |
+      ## 2.2.1
+
+      ### Patch Changes
+
+      -   b840ae1: convert pixel_ids string to array
   - sha: ffcb5ba6b32d9a465e0a235eb917232cb6f3f63a
     changeNotes: |
       ## 2.2.0
