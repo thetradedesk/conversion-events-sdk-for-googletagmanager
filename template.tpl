@@ -739,8 +739,24 @@ var generateTTDEvent = function (input) {
     if (hasValue(input, 'adv')) event.adv = input.adv;
 
     //populate selected tag ID key; pixel_ids is preferred, legacy keys remain supported
-    if (hasValue(input, input.tag_type))
-        event[input.tag_type] = input[input.tag_type];
+    if (hasValue(input, input.tag_type)) {
+        if (input.tag_type === 'pixel_ids') {
+            var pixel_ids_text = input[input.tag_type];
+            if (pixel_ids_text) {
+                var parts = pixel_ids_text.split(',');
+                var pixel_ids_arr = [];
+                for (var p = 0; p < parts.length; p++) {
+                    var trimmed = parts[p].replace(/^\s+|\s+$/g, '');
+                    if (trimmed !== '') {
+                        pixel_ids_arr.push(trimmed);
+                    }
+                }
+                event[input.tag_type] = pixel_ids_arr;
+            }
+        } else {
+            event[input.tag_type] = input[input.tag_type];
+        }
+    }
 
     //event
     if (hasValue(input, 'event_name')) event.event_name = input.event_name;
@@ -1195,6 +1211,125 @@ scenarios:
       runCode(mockData);
       assertThat(initCalls[0].name).isEqualTo('init');
       assertThat(initCalls[0].obj.referrerUrl).isEqualTo(undefined);
+  - name: pixel_ids single value is converted to array
+    code: |-
+      const calls = [];
+      mock('createArgumentsQueue', function(fnName, layerName) {
+        return function(eventName, eventObj) {
+          calls.push({name: eventName, obj: eventObj});
+        };
+      });
+      const mockData = {
+          "adv": "example",
+          "tag_type": "pixel_ids",
+          "pixel_ids": "pixelA",
+          "event_name": "page_view",
+          "sdk_cookie_sync": 1,
+          "sdk_enable_debug": 0,
+          "sdk_function_name": "ttdConversionEvents",
+          "sdk_object_name": "TTDConversionEvents",
+          "sdk_url": "https://js.adsrvr.org/up_loader.3.0.0.js",
+          "sdk_events_layer": "ttdConversionEventsLayer"
+      };
+      runCode(mockData);
+      const eventCall = calls[1];
+      assertThat(eventCall.name).isEqualTo('event');
+      assertThat(eventCall.obj.pixel_ids).isEqualTo(["pixelA"]);
+  - name: pixel_ids CSV is split and trimmed into array
+    code: |-
+      const calls = [];
+      mock('createArgumentsQueue', function(fnName, layerName) {
+        return function(eventName, eventObj) {
+          calls.push({name: eventName, obj: eventObj});
+        };
+      });
+      const mockData = {
+          "adv": "example",
+          "tag_type": "pixel_ids",
+          "pixel_ids": "pixelA, pixelB , pixelC",
+          "event_name": "page_view",
+          "sdk_cookie_sync": 1,
+          "sdk_enable_debug": 0,
+          "sdk_function_name": "ttdConversionEvents",
+          "sdk_object_name": "TTDConversionEvents",
+          "sdk_url": "https://js.adsrvr.org/up_loader.3.0.0.js",
+          "sdk_events_layer": "ttdConversionEventsLayer"
+      };
+      runCode(mockData);
+      const eventCall = calls[1];
+      assertThat(eventCall.name).isEqualTo('event');
+      assertThat(eventCall.obj.pixel_ids).isEqualTo(["pixelA", "pixelB", "pixelC"]);
+  - name: pixel_ids blank string does not set pixel_ids on event
+    code: |-
+      const calls = [];
+      mock('createArgumentsQueue', function(fnName, layerName) {
+        return function(eventName, eventObj) {
+          calls.push({name: eventName, obj: eventObj});
+        };
+      });
+      const mockData = {
+          "adv": "example",
+          "tag_type": "pixel_ids",
+          "pixel_ids": "",
+          "event_name": "page_view",
+          "sdk_cookie_sync": 1,
+          "sdk_enable_debug": 0,
+          "sdk_function_name": "ttdConversionEvents",
+          "sdk_object_name": "TTDConversionEvents",
+          "sdk_url": "https://js.adsrvr.org/up_loader.3.0.0.js",
+          "sdk_events_layer": "ttdConversionEventsLayer"
+      };
+      runCode(mockData);
+      const eventCall = calls[1];
+      assertThat(eventCall.name).isEqualTo('event');
+      assertThat(eventCall.obj.pixel_ids).isEqualTo(undefined);
+  - name: pixel_ids undefined does not set pixel_ids on event
+    code: |-
+      const calls = [];
+      mock('createArgumentsQueue', function(fnName, layerName) {
+        return function(eventName, eventObj) {
+          calls.push({name: eventName, obj: eventObj});
+        };
+      });
+      const mockData = {
+          "adv": "example",
+          "tag_type": "pixel_ids",
+          "event_name": "page_view",
+          "sdk_cookie_sync": 1,
+          "sdk_enable_debug": 0,
+          "sdk_function_name": "ttdConversionEvents",
+          "sdk_object_name": "TTDConversionEvents",
+          "sdk_url": "https://js.adsrvr.org/up_loader.3.0.0.js",
+          "sdk_events_layer": "ttdConversionEventsLayer"
+      };
+      runCode(mockData);
+      const eventCall = calls[1];
+      assertThat(eventCall.name).isEqualTo('event');
+      assertThat(eventCall.obj.pixel_ids).isEqualTo(undefined);
+  - name: Legacy upixel_id remains a string (not converted to array)
+    code: |-
+      const calls = [];
+      mock('createArgumentsQueue', function(fnName, layerName) {
+        return function(eventName, eventObj) {
+          calls.push({name: eventName, obj: eventObj});
+        };
+      });
+      const mockData = {
+          "adv": "example",
+          "tag_type": "upixel_id",
+          "upixel_id": "example-legacy",
+          "event_name": "page_view",
+          "sdk_cookie_sync": 1,
+          "sdk_enable_debug": 0,
+          "sdk_function_name": "ttdConversionEvents",
+          "sdk_object_name": "TTDConversionEvents",
+          "sdk_url": "https://js.adsrvr.org/up_loader.3.0.0.js",
+          "sdk_events_layer": "ttdConversionEventsLayer"
+      };
+      runCode(mockData);
+      const eventCall = calls[1];
+      assertThat(eventCall.name).isEqualTo('event');
+      assertThat(eventCall.obj.upixel_id).isEqualTo("example-legacy");
 
 
 ___NOTES___
