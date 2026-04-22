@@ -1,6 +1,16 @@
 homepage: https://github.com/thetradedesk/conversion-events-sdk-for-googletagmanager
 documentation: https://github.com/thetradedesk/conversion-events-sdk-for-googletagmanager
 versions:
+  - sha: 5a1c1a7f2238024d3a98b6ccfc9ff6d5d535499b
+    changeNotes: >
+      ## 2.2.2
+
+
+      ### Patch Changes
+
+
+      -   f81efac: cleanup template generation, fix gtm code to remove
+      unsupported regex code
   - sha: cde0424881e8d7d32b97ac426ba41a8abc7731ff
     changeNotes: |
       ## 2.2.1
