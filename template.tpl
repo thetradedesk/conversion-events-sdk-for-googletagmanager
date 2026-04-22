@@ -746,9 +746,18 @@ var generateTTDEvent = function (input) {
                 var parts = pixel_ids_text.split(',');
                 var pixel_ids_arr = [];
                 for (var p = 0; p < parts.length; p++) {
-                    var trimmed = parts[p].replace(/^\s+|\s+$/g, '');
-                    if (trimmed !== '') {
-                        pixel_ids_arr.push(trimmed);
+                    var val = parts[p];
+                    while (val.length > 0 && val.charAt(0) === ' ') {
+                        val = val.substring(1);
+                    }
+                    while (
+                        val.length > 0 &&
+                        val.charAt(val.length - 1) === ' '
+                    ) {
+                        val = val.substring(0, val.length - 1);
+                    }
+                    if (val !== '') {
+                        pixel_ids_arr.push(val);
                     }
                 }
                 event[input.tag_type] = pixel_ids_arr;
