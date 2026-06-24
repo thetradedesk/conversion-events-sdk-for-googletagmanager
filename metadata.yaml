@@ -1,6 +1,22 @@
 homepage: https://github.com/thetradedesk/conversion-events-sdk-for-googletagmanager
 documentation: https://github.com/thetradedesk/conversion-events-sdk-for-googletagmanager
 versions:
+  - sha: 3bb2af5e1aed945f4a5c752cc1ac4f6951f13029
+    changeNotes: >
+      ## 2.3.0
+
+
+      ### Minor Changes
+
+
+      -   cd9d865: Hardcode the TTD Conversion JavaScript SDK URL in the
+      template, instead of exposing it as a user-editable field
+
+          Previously, `SDK Advanced Technical Settings > TTD Conversion Javascript SDK URL` was a user-editable text field that defaulted to the current `https://js.adsrvr.org/up_loader.3.0.0.js`. However, when a tag instance was created from an earlier version of the template (e.g. one that defaulted to `up_loader.1.1.0.js`), the saved value on that instance was retained when the template was upgraded — GTM only applies `defaultValue` to brand-new tag instances. Combined with the `inject_script` permission being pinned to `up_loader.3.0.0.js`, the SDK could silently fail to load for upgraded clients.
+
+          The URL is now sourced directly from the sandboxed JS, alongside the `inject_script` permission. Publishing a new template version is now sufficient to migrate every existing tag instance to the new URL — no per-tag reconfiguration required.
+
+          The `TTD Conversion Javascript SDK URL` field has been removed from the GTM tag UI. Any previously-saved value on existing tag instances is ignored.
   - sha: 5a1c1a7f2238024d3a98b6ccfc9ff6d5d535499b
     changeNotes: >
       ## 2.2.2
