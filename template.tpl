@@ -435,14 +435,6 @@ ___TEMPLATE_PARAMETERS___
     "subParams": [
       {
         "type": "TEXT",
-        "name": "sdk_url",
-        "displayName": "TTD Conversion Javascript SDK URL",
-        "simpleValueType": true,
-        "defaultValue": "https://js.adsrvr.org/up_loader.3.0.0.js",
-        "help": "Default is \u0027https://js.adsrvr.org/up_loader.3.0.0.js\u0027"
-      },
-      {
-        "type": "TEXT",
         "name": "sdk_object_name",
         "displayName": "SDK Object name",
         "simpleValueType": true,
@@ -531,8 +523,7 @@ const setInWindow = require('setInWindow');
 //logging settings
 const cfgLogToGTM = true; //even if true, GTM template defaults to only showing the logging in Debug/Preview modes
 
-//Register TTD Conversion SDK globals (scripts / functions)
-const sdk_url = data.sdk_url; //URL of SDK javascript file
+const sdk_url = 'https://js.adsrvr.org/up_loader.3.0.0.js';
 const sdk_cache_token = sdk_url; //token to use for caching (URL of SDK)
 const sdk_function_name = data.sdk_function_name; //main SDK function
 const sdk_events_layer = data.sdk_events_layer; //events layer/queue
@@ -1124,7 +1115,6 @@ scenarios:
           "sdk_enable_debug": 1,
           "sdk_function_name": "ttdConversionEvents",
           "sdk_object_name": "TTDConversionEvents",
-          "sdk_url": "https://js.adsrvr.org/up_loader.3.0.0.js",
           "sdk_events_layer": "ttdConversionEventsLayer"
       };
       
@@ -1143,7 +1133,6 @@ scenarios:
           "sdk_enable_debug": 1,
           "sdk_function_name": "ttdConversionEvents",
           "sdk_object_name": "TTDConversionEvents",
-          "sdk_url": "https://js.adsrvr.org/up_loader.3.0.0.js",
           "sdk_events_layer": "ttdConversionEventsLayer"
       };
       
@@ -1167,7 +1156,6 @@ scenarios:
           "sdk_enable_debug": 0,
           "sdk_function_name": "ttdConversionEvents",
           "sdk_object_name": "TTDConversionEvents",
-          "sdk_url": "https://js.adsrvr.org/up_loader.3.0.0.js",
           "sdk_events_layer": "ttdConversionEventsLayer"
       };
       runCode(mockData);
@@ -1191,7 +1179,6 @@ scenarios:
           "sdk_enable_debug": 0,
           "sdk_function_name": "ttdConversionEvents",
           "sdk_object_name": "TTDConversionEvents",
-          "sdk_url": "https://js.adsrvr.org/up_loader.3.0.0.js",
           "sdk_events_layer": "ttdConversionEventsLayer"
       };
       runCode(mockData);
@@ -1214,7 +1201,6 @@ scenarios:
           "sdk_enable_debug": 0,
           "sdk_function_name": "ttdConversionEvents",
           "sdk_object_name": "TTDConversionEvents",
-          "sdk_url": "https://js.adsrvr.org/up_loader.3.0.0.js",
           "sdk_events_layer": "ttdConversionEventsLayer"
       };
       runCode(mockData);
@@ -1237,7 +1223,6 @@ scenarios:
           "sdk_enable_debug": 0,
           "sdk_function_name": "ttdConversionEvents",
           "sdk_object_name": "TTDConversionEvents",
-          "sdk_url": "https://js.adsrvr.org/up_loader.3.0.0.js",
           "sdk_events_layer": "ttdConversionEventsLayer"
       };
       runCode(mockData);
@@ -1261,7 +1246,6 @@ scenarios:
           "sdk_enable_debug": 0,
           "sdk_function_name": "ttdConversionEvents",
           "sdk_object_name": "TTDConversionEvents",
-          "sdk_url": "https://js.adsrvr.org/up_loader.3.0.0.js",
           "sdk_events_layer": "ttdConversionEventsLayer"
       };
       runCode(mockData);
@@ -1285,7 +1269,6 @@ scenarios:
           "sdk_enable_debug": 0,
           "sdk_function_name": "ttdConversionEvents",
           "sdk_object_name": "TTDConversionEvents",
-          "sdk_url": "https://js.adsrvr.org/up_loader.3.0.0.js",
           "sdk_events_layer": "ttdConversionEventsLayer"
       };
       runCode(mockData);
@@ -1308,7 +1291,6 @@ scenarios:
           "sdk_enable_debug": 0,
           "sdk_function_name": "ttdConversionEvents",
           "sdk_object_name": "TTDConversionEvents",
-          "sdk_url": "https://js.adsrvr.org/up_loader.3.0.0.js",
           "sdk_events_layer": "ttdConversionEventsLayer"
       };
       runCode(mockData);
@@ -1332,7 +1314,6 @@ scenarios:
           "sdk_enable_debug": 0,
           "sdk_function_name": "ttdConversionEvents",
           "sdk_object_name": "TTDConversionEvents",
-          "sdk_url": "https://js.adsrvr.org/up_loader.3.0.0.js",
           "sdk_events_layer": "ttdConversionEventsLayer"
       };
       runCode(mockData);
