@@ -1,6 +1,23 @@
 homepage: https://github.com/thetradedesk/conversion-events-sdk-for-googletagmanager
 documentation: https://github.com/thetradedesk/conversion-events-sdk-for-googletagmanager
 versions:
+  - sha: e64a3dbc92ccd87fd49734a6a90eb8f910464075
+    changeNotes: >
+      ## 2.4.0
+
+
+      ### Minor Changes
+
+
+      -   d8e405e: Tag template now reports its own version as
+      `eventDataSourceVersion` on the SDK init call. This lets Beacon attribute
+      conversion events to the specific GTM template version that fired them,
+      which is useful for diagnosing client-side issues that correlate to
+      template upgrades.
+
+          The value is injected at build time from `package.json` (via a `__GTM_TEMPLATE_VERSION__` placeholder in the sandboxed JS, substituted by `build_template_tpl.js`), so no manual upkeep is required — the existing changeset-driven version bump on every merge flows through automatically.
+
+          Note: this depends on a corresponding change to the JS SDK (`up_loader.3.0.0.js`) that adds `eventDataSourceVersion` to its accepted `init()` parameters. Until that ships, the field is silently ignored by the SDK and behavior is unchanged.
   - sha: 3bb2af5e1aed945f4a5c752cc1ac4f6951f13029
     changeNotes: >
       ## 2.3.0
