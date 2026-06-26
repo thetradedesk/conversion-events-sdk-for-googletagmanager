@@ -528,7 +528,7 @@ const sdk_cache_token = sdk_url; //token to use for caching (URL of SDK)
 const sdk_function_name = data.sdk_function_name; //main SDK function
 const sdk_events_layer = data.sdk_events_layer; //events layer/queue
 const sdk_cookie_sync = data.sdk_cookie_sync; //boolean: whether cookie syncing is enabled on init event
-const gtm_template_version = '2.3.0'; //replaced at build time with package.json version
+const gtm_template_version = '2.5.0'; //replaced at build time with package.json version
 
 //empty function to provide as a callback argument
 const doNothing = () => {};
