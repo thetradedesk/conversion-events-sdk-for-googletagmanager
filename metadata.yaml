@@ -1,6 +1,27 @@
 homepage: https://github.com/thetradedesk/conversion-events-sdk-for-googletagmanager
 documentation: https://github.com/thetradedesk/conversion-events-sdk-for-googletagmanager
 versions:
+  - sha: 980a35685ebc4c3a782697f1553537722a16ac58
+    changeNotes: >
+      ## 2.5.0
+
+
+      ### Minor Changes
+
+
+      -   85334d9: Fix CI ordering so the `gtm_template_version` constant baked
+      into `template.tpl` matches the version in the metadata.yaml entry
+      committed alongside it. Previously the `build` stage ran `pnpm
+      build:template-tpl` against the _pre-bump_ `package.json`, then the
+      `release-public` stage ran `pnpm changeset version` to bump
+      `package.json`, then committed the (stale) `dist/template.tpl` to the
+      public branch. The result was that every release shipped a template
+      containing the _previous_ release's version — e.g. the `2.4.0` release's
+      template had `gtm_template_version = '2.3.0'`. The release on `public` now
+      rebuilds the template after the changeset version bump so the two versions
+      agree.
+
+          Conversion events from production tag instances will start reporting the correct, current `eventDataSourceVersion` once this release lands. Historical releases have an off-by-one version label baked into their template; that cannot be backfilled but is harmless — it was already the case before any version was reported at all.
   - sha: e64a3dbc92ccd87fd49734a6a90eb8f910464075
     changeNotes: >
       ## 2.4.0
